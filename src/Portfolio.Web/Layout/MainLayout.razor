@@ -1,0 +1,61 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject ThemeService ThemeService
+@inject IJSRuntime JS
+
+<div class="root-layout">
+    <Navigation />
+    <main>
+        <section class="section hero-section" id="home">
+            <Hero />
+        </section>
+        <section class="section" id="about">
+            <AboutSection />
+        </section>
+        <section class="section" id="experience">
+            <ExperienceSection />
+        </section>
+        <section class="section" id="projects">
+            <ProjectsSection />
+        </section>
+        <section class="section" id="games">
+            <GamesSection />
+        </section>
+        <section class="section" id="contact">
+            <ContactSection />
+        </section>
+        <footer class="footer">
+            <p>&copy; @DateTime.Now.Year - Dawid Bogocz. Built with Blazor &amp; .NET</p>
+        </footer>
+    </main>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        ThemeService.ThemeChanged += OnThemeChanged;
+        var savedTheme = await JS.InvokeAsync<string>("portfolio.loadTheme");
+        if (!string.IsNullOrEmpty(savedTheme))
+            ThemeService.SetTheme(savedTheme);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("portfolio.applyTheme", ThemeService.CurrentTheme);
+            await JS.InvokeVoidAsync("portfolio.initScrollspy");
+        }
+    }
+
+    private async void OnThemeChanged()
+    {
+        await JS.InvokeVoidAsync("portfolio.applyTheme", ThemeService.CurrentTheme);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ThemeService.ThemeChanged -= OnThemeChanged;
+    }
+}

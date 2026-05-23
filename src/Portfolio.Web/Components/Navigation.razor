@@ -1,0 +1,35 @@
+@inject ThemeService ThemeService
+@inject IJSRuntime JS
+
+<nav class="navbar">
+    <div class="nav-brand">dzeyd.dev</div>
+    <div class="nav-links">
+        <a class="nav-link" href="#about" @onclick:preventDefault @onclick='() => ScrollTo("about")'>About</a>
+        <a class="nav-link" href="#experience" @onclick:preventDefault @onclick='() => ScrollTo("experience")'>Experience</a>
+        <a class="nav-link" href="#projects" @onclick:preventDefault @onclick='() => ScrollTo("projects")'>Projects</a>
+        <a class="nav-link" href="#games" @onclick:preventDefault @onclick='() => ScrollTo("games")'>Games</a>
+        <a class="nav-link" href="#contact" @onclick:preventDefault @onclick='() => ScrollTo("contact")'>Contact</a>
+    </div>
+    <div class="theme-toggles">
+        @foreach (var t in ThemeService.AllThemes)
+        {
+            <button class="theme-btn@(ThemeService.CurrentTheme == t ? " active" : "")"
+                    @onclick='() => SetTheme(t)'>
+                @t
+            </button>
+        }
+    </div>
+</nav>
+
+@code {
+    private async Task ScrollTo(string id)
+    {
+        await JS.InvokeVoidAsync("portfolio.scrollTo", id);
+    }
+
+    private async Task SetTheme(string theme)
+    {
+        ThemeService.SetTheme(theme);
+        await JS.InvokeVoidAsync("portfolio.applyTheme", theme);
+    }
+}

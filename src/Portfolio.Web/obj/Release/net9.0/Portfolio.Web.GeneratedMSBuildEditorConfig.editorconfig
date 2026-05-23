@@ -1,0 +1,65 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.TargetFramework = net9.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = Portfolio.Web
+build_property.RootNamespace = Portfolio.Web
+build_property.ProjectDir = /home/dzeyd/Portfolio/src/Portfolio.Web/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = false
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /home/dzeyd/Portfolio/src/Portfolio.Web
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 9.0
+build_property.EnableCodeStyleSeverity = 
+
+[/home/dzeyd/Portfolio/src/Portfolio.Web/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/dzeyd/Portfolio/src/Portfolio.Web/Components/AboutSection.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9BYm91dFNlY3Rpb24ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/dzeyd/Portfolio/src/Portfolio.Web/Components/ContactSection.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Db250YWN0U2VjdGlvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/dzeyd/Portfolio/src/Portfolio.Web/Components/ExperienceSection.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9FeHBlcmllbmNlU2VjdGlvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/dzeyd/Portfolio/src/Portfolio.Web/Components/GamesSection.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9HYW1lc1NlY3Rpb24ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/dzeyd/Portfolio/src/Portfolio.Web/Components/Hero.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9IZXJvLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/dzeyd/Portfolio/src/Portfolio.Web/Components/Navigation.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9OYXZpZ2F0aW9uLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/dzeyd/Portfolio/src/Portfolio.Web/Components/ProjectsSection.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Qcm9qZWN0c1NlY3Rpb24ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/dzeyd/Portfolio/src/Portfolio.Web/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0L01haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/dzeyd/Portfolio/src/Portfolio.Web/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
