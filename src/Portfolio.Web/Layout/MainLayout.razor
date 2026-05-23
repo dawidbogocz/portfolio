@@ -9,25 +9,26 @@
         <section class="section hero-section" id="home">
             <Hero />
         </section>
-        <section class="section" id="about">
+        <section class="section reveal" id="about">
             <AboutSection />
         </section>
-        <section class="section" id="experience">
+        <section class="section reveal" id="experience">
             <ExperienceSection />
         </section>
-        <section class="section" id="projects">
+        <section class="section reveal" id="projects">
             <ProjectsSection />
         </section>
-        <section class="section" id="games">
+        <section class="section reveal" id="games">
             <GamesSection />
         </section>
-        <section class="section" id="contact">
+        <section class="section reveal" id="contact">
             <ContactSection />
         </section>
         <footer class="footer">
             <p>&copy; @DateTime.Now.Year - Dawid Bogocz. Built with Blazor &amp; .NET</p>
         </footer>
     </main>
+    <button id="back-to-top" @onclick='() => ScrollTo("home")'>&#8593;</button>
 </div>
 
 @code {
@@ -45,6 +46,8 @@
         {
             await JS.InvokeVoidAsync("portfolio.applyTheme", ThemeService.CurrentTheme);
             await JS.InvokeVoidAsync("portfolio.initScrollspy");
+            await JS.InvokeVoidAsync("portfolio.initScrollReveal");
+            await JS.InvokeVoidAsync("portfolio.initBackToTop");
         }
     }
 
@@ -52,6 +55,11 @@
     {
         await JS.InvokeVoidAsync("portfolio.applyTheme", ThemeService.CurrentTheme);
         StateHasChanged();
+    }
+
+    private async Task ScrollTo(string id)
+    {
+        await JS.InvokeVoidAsync("portfolio.scrollTo", id);
     }
 
     public void Dispose()

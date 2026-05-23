@@ -11,13 +11,18 @@
         <a class="nav-link" href="#contact" @onclick:preventDefault @onclick='() => ScrollTo("contact")'>Contact</a>
     </div>
     <div class="theme-toggles">
-        @foreach (var t in ThemeService.AllThemes)
-        {
-            <button class="theme-btn@(ThemeService.CurrentTheme == t ? " active" : "")"
-                    @onclick='() => SetTheme(t)'>
-                @t
-            </button>
-        }
+        <button class="theme-dot@(ThemeService.CurrentTheme == "vsdark" ? " active" : "") vsdark-dot"
+                @onclick='() => SetTheme("vsdark")'
+                title="VS Dark"></button>
+        <button class="theme-dot@(ThemeService.CurrentTheme == "godot" ? " active" : "") godot-dot"
+                @onclick='() => SetTheme("godot")'
+                title="Godot"></button>
+        <button class="theme-dot@(ThemeService.CurrentTheme == "monokai" ? " active" : "") monokai-dot"
+                @onclick='() => SetTheme("monokai")'
+                title="Monokai"></button>
+        <button class="theme-dot@(ThemeService.CurrentTheme == "light" ? " active" : "") light-dot"
+                @onclick='() => SetTheme("light")'
+                title="Light"></button>
     </div>
 </nav>
 

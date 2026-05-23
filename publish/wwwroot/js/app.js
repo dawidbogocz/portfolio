@@ -1,31 +1,29 @@
-// app.js -- Theme persistence, smooth scrolling, and scrollspy
+// app.js -- Theme persistence, smooth scrolling, scrollspy, and scroll reveal
 // How to extend: add new functions to window.portfolio object
 
 window.portfolio = {
 
   // === THEME MANAGEMENT ===
-  // Loads saved theme from localStorage, falls back to default
   loadTheme: function() {
     return localStorage.getItem('portfolio-theme') || 'vsdark';
   },
 
-  // Applies theme by setting data-theme attribute on body
-  // CSS uses [data-theme="name"] selectors for all color variables
   applyTheme: function(t) {
     document.body.dataset.theme = t;
     localStorage.setItem('portfolio-theme', t);
   },
 
   // === SMOOTH SCROLL ===
-  // Scrolls to a section by its element ID with smooth behavior
   scrollTo: function(id) {
     var el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+      // Update URL hash without jumping
+      history.pushState(null, null, '#' + id);
+    }
   },
 
   // === SCROLLSPY ===
-  // Highlights active nav link based on which section is in view
-  // Uses IntersectionObserver for performance
   initScrollspy: function() {
     var navLinks = document.querySelectorAll('.nav-link');
     var sections = [];
@@ -50,6 +48,37 @@ window.portfolio = {
     sections.forEach(function(id) {
       var el = document.getElementById(id);
       if (el) observer.observe(el);
+    });
+  },
+
+  // === SCROLL REVEAL (fade-in on scroll) ===
+  initScrollReveal: function() {
+    var els = document.querySelectorAll('.reveal');
+    if (els.length === 0) return;
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    els.forEach(function(el) { observer.observe(el); });
+  },
+
+  // === BACK TO TOP ===
+  initBackToTop: function() {
+    var btn = document.getElementById('back-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 400) {
+        btn.classList.add('visible');
+      } else {
+        btn.classList.remove('visible');
+      }
     });
   }
 };

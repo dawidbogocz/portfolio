@@ -167,30 +167,40 @@ img {
     border-bottom-color: var(--accent);
 }
 
-/* Theme toggle buttons in navbar */
-.theme-toggle {
-    padding: 4px 10px;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 12px;
+/* Theme dot buttons in navbar (colored circles) */
+.theme-toggles {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 16px;
+}
+
+.theme-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
     cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-    margin-left: 4px;
+    padding: 0;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
 }
 
-.theme-toggle:hover {
-    color: var(--text);
-    border-color: var(--accent);
+.theme-dot:hover {
+    transform: scale(1.2);
 }
 
-.theme-toggle.active {
-    background: var(--accent);
-    color: var(--bg);
-    border-color: var(--accent);
+.theme-dot.active {
+    border-color: var(--text);
+    box-shadow: 0 0 8px rgba(255,255,255,0.3);
+    transform: scale(1.15);
 }
+
+.vsdark-dot { background: #1e1e2e; border-color: #569cd6; }
+.godot-dot { background: #1c1c2a; border-color: #e9522a; }
+.monokai-dot { background: #272822; border-color: #a6e22e; }
+.light-dot { background: #f5f5f5; border-color: #888; }
+.light-dot.active { border-color: #1a1a1a; box-shadow: 0 0 8px rgba(0,0,0,0.2); }
 
 /* ----------------------------------------------------------
    5. Sections
@@ -295,30 +305,39 @@ img {
     align-items: start;
 }
 
-.code-block {
+.about-code {
     font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
     font-size: 0.85rem;
-    line-height: 1.7;
+    line-height: 1.9;
     background: var(--bg-tertiary);
-    padding: 20px;
+    padding: 24px;
     border-radius: 8px;
     border: 1px solid var(--border);
     overflow-x: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
 }
 
-.code-block .keyword {
+.code-line {
+    white-space: nowrap;
+}
+
+.code-brace {
+    color: var(--text);
+}
+
+.indent-1 {
+    padding-left: 24px;
+}
+
+.code-keyword {
     color: #569cd6;
 }
 
-.code-block .string {
-    color: #ce9178;
+.code-type {
+    color: #4ec9b0;
 }
 
-.code-block .comment {
-    color: #6a9955;
-    font-style: italic;
+.code-string {
+    color: #ce9178;
 }
 
 .about-text {
@@ -566,10 +585,9 @@ img {
 /* ----------------------------------------------------------
    13. Theme Toggle Buttons (in navbar)
    ---------------------------------------------------------- */
-.theme-toggle.active {
-    background: var(--accent);
-    color: var(--bg);
-    border-color: var(--accent);
+.theme-dot.active {
+    border-color: var(--text);
+    box-shadow: 0 0 8px rgba(255,255,255,0.3);
 }
 
 /* ----------------------------------------------------------
@@ -593,6 +611,42 @@ img {
     50% {
         opacity: 1;
     }
+}
+
+/* ----------------------------------------------------------
+   Blazor Error UI (hidden by default, shown by Blazor on error)
+   ---------------------------------------------------------- */
+#blazor-error-ui {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--accent, #e74c3c);
+    color: #fff;
+    padding: 12px 24px;
+    font-size: 0.85rem;
+    z-index: 999;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+}
+
+#blazor-error-ui .reload {
+    color: #fff;
+    text-decoration: underline;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    opacity: 0.7;
+    font-size: 0.8rem;
+}
+
+#blazor-error-ui .dismiss:hover {
+    opacity: 1;
 }
 
 /* ----------------------------------------------------------
@@ -727,9 +781,9 @@ img {
         font-size: 0.75rem;
     }
 
-    .theme-toggle {
-        padding: 3px 8px;
-        font-size: 0.7rem;
+    .theme-dot {
+        width: 14px;
+        height: 14px;
     }
 
     .projects-grid,
@@ -768,7 +822,7 @@ img {
         font-size: 0.82rem;
     }
 
-    .code-block {
+    .about-code {
         font-size: 0.78rem;
         padding: 14px;
     }
@@ -781,4 +835,52 @@ img {
     .loading-text {
         font-size: 1.2rem;
     }
+}
+
+/* ----------------------------------------------------------
+   17. Scroll Reveal Animations
+   ---------------------------------------------------------- */
+.reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ----------------------------------------------------------
+   18. Back to Top Button
+   ---------------------------------------------------------- */
+#back-to-top {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+#back-to-top.visible {
+    opacity: 0.9;
+    transform: translateY(0);
+}
+
+#back-to-top.visible:hover {
+    opacity: 1;
 }

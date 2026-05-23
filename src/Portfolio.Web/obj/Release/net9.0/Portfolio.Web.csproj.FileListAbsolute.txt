@@ -199,8 +199,6 @@
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/icudt_CJK.tjcz0u77k5.dat
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/icudt_EFIGS.tptq2av103.dat
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/icudt_no_CJK.lfu7j35m59.dat
-/home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/Portfolio.Web.305fhccs0b.wasm
-/home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/Portfolio.Web.oosmc1w9jq.pdb
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/blazor.boot.json
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/blazor.webassembly.js.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/Microsoft.AspNetCore.Authorization.mss3h30ktc.wasm.gz
@@ -403,8 +401,6 @@
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/icudt_CJK.tjcz0u77k5.dat.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/icudt_EFIGS.tptq2av103.dat.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/icudt_no_CJK.lfu7j35m59.dat.gz
-/home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/Portfolio.Web.305fhccs0b.wasm.gz
-/home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/Portfolio.Web.oosmc1w9jq.pdb.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/blazor.boot.json.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/Portfolio.Web.staticwebassets.runtime.json
 /home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/Portfolio.Web.staticwebassets.endpoints.json
@@ -815,9 +811,6 @@
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/scopedcss/bundle/Portfolio.Web.styles.css
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/blazor.build.boot-extension.json
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/blazor.boot.json
-/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/ymg7g7fhyl-mah5bq6gdq.gz
-/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/edcupb0dbx-85tjv51u6i.gz
-/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/ga1f0ssji8-n8ads94fuk.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/qhf4tnlocs-md9yvkcqlf.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/tag1byfe1k-mss3h30ktc.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/8je39gffly-m523nak9l1.gz
@@ -1019,9 +1012,6 @@
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/txvg0e5lxo-tjcz0u77k5.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/ccc92nx329-tptq2av103.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/71z9ou4w40-lfu7j35m59.gz
-/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/nt0p4iz2oc-305fhccs0b.gz
-/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/waq0s76nkr-oosmc1w9jq.gz
-/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/n1lfoytjjo-s6yc8kz9vw.gz
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/staticwebassets.build.json
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/staticwebassets.build.json.cache
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/staticwebassets.development.json
@@ -1031,3 +1021,14 @@
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/refint/Portfolio.Web.dll
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/Portfolio.Web.pdb
 /home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/ref/Portfolio.Web.dll
+/home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/Portfolio.Web.cqfvd7zne2.wasm
+/home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/Portfolio.Web.okqszo09q3.pdb
+/home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/Portfolio.Web.cqfvd7zne2.wasm.gz
+/home/dzeyd/Portfolio/src/Portfolio.Web/bin/Release/net9.0/wwwroot/_framework/Portfolio.Web.okqszo09q3.pdb.gz
+/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/Portfolio.Web.sourcelink.json
+/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/ymg7g7fhyl-y89973nog1.gz
+/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/edcupb0dbx-xzlwkh24v2.gz
+/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/ga1f0ssji8-qurr8ru7nx.gz
+/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/nt0p4iz2oc-cqfvd7zne2.gz
+/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/waq0s76nkr-okqszo09q3.gz
+/home/dzeyd/Portfolio/src/Portfolio.Web/obj/Release/net9.0/compressed/n1lfoytjjo-tr8f2ulngi.gz
