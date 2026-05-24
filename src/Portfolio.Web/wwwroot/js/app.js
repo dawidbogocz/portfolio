@@ -80,5 +80,50 @@ window.portfolio = {
         btn.classList.remove('visible');
       }
     });
+  },
+
+  // === TERMINAL SCROLL ===
+  /**
+   * Scrolls a terminal/console element to its bottom.
+   * Used by TerminalHero to auto-scroll output as new lines are appended.
+   * @param {HTMLElement} el - The element to scroll to its maximum scroll extent.
+   */
+  scrollElementToBottom: function(el) {
+    if (el) {
+      el.scrollTop = el.scrollHeight;
+    }
+  },
+
+  // === SCROLL-UP FADE EFFECT ===
+  /**
+   * Fades in the content sections below the hero as the user scrolls down.
+   *
+   * On page load, the .fade-scroll-content container starts at opacity: 0 so only
+   * the terminal hero is visible. As the user scrolls beyond the hero section,
+   * opacity increases linearly until it reaches 1 (fully visible) when the hero
+   * is completely scrolled out of view.
+   *
+   * This creates a smooth "reveal from below the fold" transition effect.
+   */
+  initScrollFade: function() {
+    var fadeEl = document.querySelector('.fade-scroll-content');
+    var heroEl = document.getElementById('home');
+    if (!fadeEl || !heroEl) return;
+
+    var updateFade = function() {
+      // Get the full height of the hero section
+      var heroHeight = heroEl.offsetHeight;
+      var scrollY = window.scrollY;
+
+      // Calculate fade progress: 0 at top of page, 1 once hero is fully scrolled past
+      // progress = scrollY / heroHeight, clamped to max 1
+      var progress = Math.min(scrollY / heroHeight, 1);
+
+      // Apply calculated opacity to the content container
+      fadeEl.style.opacity = progress;
+    };
+
+    window.addEventListener('scroll', updateFade);
+    updateFade();
   }
 };

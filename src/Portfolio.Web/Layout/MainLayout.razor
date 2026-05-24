@@ -3,35 +3,56 @@
 @inject ThemeService ThemeService
 @inject IJSRuntime JS
 
+@* === Inject Section Ends === *@
+
+@* === REGION: Root Layout Structure === *@
 <div class="root-layout">
+    @* === Navigation Bar === *@
     <Navigation />
     <main>
+        @* === Hero / Terminal Section === *@
         <section class="section hero-section" id="home">
-            <Hero />
+            <TerminalHero />
         </section>
+
+        @* === Fade-Scroll Content (sections that fade in/out) === *@
+        <div class="fade-scroll-content">
+        @* === About Section === *@
         <section class="section reveal" id="about">
             <AboutSection />
         </section>
+        @* === Experience / Timeline Section === *@
         <section class="section reveal" id="experience">
             <ExperienceSection />
         </section>
+        @* === Projects Section === *@
         <section class="section reveal" id="projects">
             <ProjectsSection />
         </section>
+        @* === Games Hub Section === *@
         <section class="section reveal" id="games">
-            <GamesSection />
+            <GamesHub />
         </section>
+        @* === Contact Section === *@
         <section class="section reveal" id="contact">
             <ContactSection />
         </section>
+        </div>
+        @* === Footer === *@
         <footer class="footer">
             <p>&copy; @DateTime.Now.Year - Dawid Bogocz. Built with Blazor &amp; .NET</p>
         </footer>
     </main>
+    @* === Back-to-Top Button === *@
     <button id="back-to-top" @onclick='() => ScrollTo("home")'>&#8593;</button>
 </div>
+@* === END REGION: Root Layout Structure === *@
 
+@* === REGION: Code-Behind === *@
 @code {
+    /// <summary>
+    /// Initializes the layout: subscribes to theme changes and loads the saved theme from localStorage.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         ThemeService.ThemeChanged += OnThemeChanged;
@@ -40,6 +61,9 @@
             ThemeService.SetTheme(savedTheme);
     }
 
+    /// <summary>
+    /// Runs after each render. On first render, initializes client-side JS features (theme, scrollspy, scroll reveal, back-to-top, scroll fade).
+    /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -48,20 +72,31 @@
             await JS.InvokeVoidAsync("portfolio.initScrollspy");
             await JS.InvokeVoidAsync("portfolio.initScrollReveal");
             await JS.InvokeVoidAsync("portfolio.initBackToTop");
+            await JS.InvokeVoidAsync("portfolio.initScrollFade");
         }
     }
 
+    /// <summary>
+    /// Handles theme change events by reapplying the current theme via JS and re-rendering.
+    /// </summary>
     private async void OnThemeChanged()
     {
         await JS.InvokeVoidAsync("portfolio.applyTheme", ThemeService.CurrentTheme);
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Smoothly scrolls the page to the element with the given ID using JS interop.
+    /// </summary>
+    /// <param name="id">The HTML element ID to scroll to.</param>
     private async Task ScrollTo(string id)
     {
         await JS.InvokeVoidAsync("portfolio.scrollTo", id);
     }
 
+    /// <summary>
+    /// Disposes the component by unsubscribing from theme change events.
+    /// </summary>
     public void Dispose()
     {
         ThemeService.ThemeChanged -= OnThemeChanged;

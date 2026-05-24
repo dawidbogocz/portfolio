@@ -1,0 +1,530 @@
+@implements IDisposable
+
+<div class="memory-game-wrapper">
+    <div class="memory-game-header">
+        <div class="memory-stats">
+            <div class="memory-stat">
+                <span class="memory-stat-label">Moves</span>
+                <span class="memory-stat-value">@Moves</span>
+            </div>
+            <div class="memory-stat">
+                <span class="memory-stat-label">Pairs</span>
+                <span class="memory-stat-value">@PairsFound / 8</span>
+            </div>
+            <div class="memory-stat">
+                <span class="memory-stat-label">Time</span>
+                <span class="memory-stat-value">@FormatTime(ElapsedSeconds)</span>
+            </div>
+        </div>
+        <div class="memory-game-actions">
+            <button class="memory-btn" @onclick="RestartGame">Restart</button>
+            <button class="memory-btn memory-btn-back" @onclick="() => OnBack?.Invoke()">← Back</button>
+        </div>
+    </div>
+
+    <div class="memory-grid @(GameStarted ? "memory-grid--started" : "")">
+        @foreach (var card in Cards)
+        {
+            <div class="memory-card @(card.IsFlipped || card.IsMatched ? "memory-card--flipped" : "") @(card.IsMatched ? "memory-card--matched" : "")"
+                 @onclick="() => FlipCard(card.Id)">
+                <div class="memory-card-inner">
+                    <div class="memory-card-front">
+                        <span class="memory-card-emoji">@card.Emoji</span>
+                    </div>
+                    <div class="memory-card-back"></div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (GameWon)
+    {
+        <div class="memory-win-overlay @WinAnimationClass">
+            <div class="memory-win-content">
+                <div class="memory-win-emoji">🎉</div>
+                <div class="memory-win-title">You Win!</div>
+                <div class="memory-win-stats">
+                    <div>Completed in <strong>@Moves</strong> moves</div>
+                    <div>Time: <strong>@FormatTime(ElapsedSeconds)</strong></div>
+                </div>
+                <button class="memory-btn memory-btn-primary" @onclick="RestartGame">Play Again</button>
+                <button class="memory-btn memory-btn-back" @onclick="() => OnBack?.Invoke()">← Back to Games</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    // === Region: Parameters ===
+
+    /// <summary>
+    /// Callback invoked when the user clicks the "Back" button to return to the game selection screen.
+    /// </summary>
+    [Parameter]
+    public Action? OnBack { get; set; }
+
+    // === Region: Card Model ===
+
+    /// <summary>
+    /// Represents a single memory card with an identifier, pair association, emoji display value,
+    /// and flip/matched state tracking.
+    /// </summary>
+    private class Card
+    {
+        /// <summary>Gets the unique identifier for this card.</summary>
+        public int Id { get; init; }
+
+        /// <summary>Gets the pair identifier shared with the matching card.</summary>
+        public int PairId { get; init; }
+
+        /// <summary>Gets the emoji string displayed on the card face.</summary>
+        public string Emoji { get; init; } = string.Empty;
+
+        /// <summary>Gets or sets whether the card is currently flipped face-up.</summary>
+        public bool IsFlipped { get; set; }
+
+        /// <summary>Gets or sets whether the card has been successfully matched.</summary>
+        public bool IsMatched { get; set; }
+    }
+
+    // === Region: Game State ===
+
+    /// <summary>The list of all cards in the current game board.</summary>
+    private List<Card> Cards = new();
+
+    /// <summary>The total number of moves (pairs of flips) made so far.</summary>
+    private int Moves;
+
+    /// <summary>The number of pairs successfully matched.</summary>
+    private int PairsFound;
+
+    /// <summary>Elapsed game time in seconds since the first card was flipped.</summary>
+    private int ElapsedSeconds;
+
+    /// <summary>Indicates whether the player has matched all pairs and won the game.</summary>
+    private bool GameWon;
+
+    /// <summary>Indicates whether the game timer and first flip have been started.</summary>
+    private bool GameStarted;
+
+    /// <summary>CSS class applied to the win overlay to trigger the show animation.</summary>
+    private string WinAnimationClass = "";
+
+    // === Region: Private Fields ===
+
+    /// <summary>ID of the first card flipped in the current pairing attempt, or null if no card is selected.</summary>
+    private int? _firstCardId;
+
+    /// <summary>Whether the game is currently evaluating a pair match (prevents additional flips).</summary>
+    private bool _isChecking;
+
+    /// <summary>Timer that ticks every second to track elapsed game time.</summary>
+    private Timer? _timer;
+
+    // === Region: Constants ===
+
+    /// <summary>The set of emoji characters used for card pairs. Each emoji appears on exactly two cards.</summary>
+    private static readonly string[] Emojis = { "🍎", "🍊", "🍋", "🍇", "🍓", "🍒", "🍑", "🥝" };
+
+    // === Region: Lifecycle Methods ===
+
+    /// <summary>
+    /// Called by Blazor when the component is first initialized. Sets up the initial game state.
+    /// </summary>
+    protected override void OnInitialized()
+    {
+        InitializeGame();
+    }
+
+    // === Region: Game Initialization ===
+
+    /// <summary>
+    /// Creates a shuffled deck of paired cards, resets all game state fields, stops and disposes any
+    /// existing timer, and prepares the board for a new game.
+    /// </summary>
+    private void InitializeGame()
+    {
+        var newCards = new List<Card>();
+        var id = 0;
+
+        foreach (var emoji in Emojis)
+        {
+            newCards.Add(new Card { Id = id++, PairId = Array.IndexOf(Emojis, emoji), Emoji = emoji });
+            newCards.Add(new Card { Id = id++, PairId = Array.IndexOf(Emojis, emoji), Emoji = emoji });
+        }
+
+        var rng = Random.Shared;
+        Cards = newCards.OrderBy(_ => rng.Next()).ToList();
+        Moves = 0;
+        PairsFound = 0;
+        ElapsedSeconds = 0;
+        GameWon = false;
+        GameStarted = false;
+        WinAnimationClass = "";
+        _firstCardId = null;
+        _isChecking = false;
+        _timer?.Dispose();
+        _timer = null;
+    }
+
+    // === Region: Game Logic ===
+
+    /// <summary>
+    /// Handles a card flip by the player. If this is the first flip in a turn, stores the card ID and
+    /// starts the game timer on the first-ever flip. If it is the second flip, increments the move
+    /// counter, checks for a match, and either marks the pair as matched (and checks for a win) or
+    /// flips both cards back after a short delay.
+    /// </summary>
+    /// <param name="cardId">The unique identifier of the card being flipped.</param>
+    private void FlipCard(int cardId)
+    {
+        if (_isChecking || GameWon) return;
+
+        var card = Cards.First(c => c.Id == cardId);
+        if (card.IsFlipped || card.IsMatched) return;
+
+        if (!GameStarted)
+        {
+            GameStarted = true;
+            _timer = new Timer(_ =>
+            {
+                ElapsedSeconds++;
+                InvokeAsync(StateHasChanged);
+            }, null, 1000, 1000);
+        }
+
+        card.IsFlipped = true;
+
+        if (_firstCardId is null)
+        {
+            _firstCardId = cardId;
+        }
+        else
+        {
+            Moves++;
+            var firstCard = Cards.First(c => c.Id == _firstCardId.Value);
+            _isChecking = true;
+
+            if (firstCard.PairId == card.PairId)
+            {
+                firstCard.IsMatched = true;
+                card.IsMatched = true;
+                PairsFound++;
+                _firstCardId = null;
+                _isChecking = false;
+
+                if (PairsFound == 8)
+                {
+                    GameWon = true;
+                    _timer?.Dispose();
+                    _timer = null;
+                    WinAnimationClass = "memory-win--show";
+                }
+            }
+            else
+            {
+                var firstId = _firstCardId.Value;
+                _firstCardId = null;
+
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(800);
+                    await InvokeAsync(() =>
+                    {
+                        var c1 = Cards.First(c => c.Id == firstId);
+                        var c2 = Cards.First(c => c.Id == cardId);
+                        c1.IsFlipped = false;
+                        c2.IsFlipped = false;
+                        _isChecking = false;
+                        StateHasChanged();
+                    });
+                });
+            }
+        }
+    }
+
+    // === Region: Game Controls ===
+
+    /// <summary>Resets the game to its initial state by calling <see cref="InitializeGame"/>.</summary>
+    private void RestartGame()
+    {
+        InitializeGame();
+    }
+
+    // === Region: UI Helpers ===
+
+    /// <summary>Formats a total number of seconds as a MM:SS string.</summary>
+    /// <param name="totalSeconds">The total elapsed seconds to format.</param>
+    /// <returns>A zero-padded string in the format "MM:SS".</returns>
+    private static string FormatTime(int totalSeconds)
+    {
+        var min = totalSeconds / 60;
+        var sec = totalSeconds % 60;
+        return $"{min:D2}:{sec:D2}";
+    }
+
+    // === Region: IDisposable Implementation ===
+
+    /// <summary>
+    /// Releases the game timer resource. Part of the <see cref="IDisposable"/> pattern.
+    /// Called automatically by Blazor when the component is removed from the render tree.
+    /// </summary>
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}
+
+<style>
+    .memory-game-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        user-select: none;
+        font-family: 'Segoe UI', system-ui, sans-serif;
+        position: relative;
+    }
+
+    .memory-game-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        max-width: 440px;
+        padding: 0.75rem 1rem;
+        background: #1a1a2e;
+        border-radius: 8px;
+        border: 1px solid #16213e;
+    }
+
+    .memory-stats {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .memory-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.1rem;
+    }
+
+    .memory-stat-label {
+        font-size: 0.7rem;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .memory-stat-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #e0e0e0;
+    }
+
+    .memory-game-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .memory-btn {
+        padding: 0.4rem 0.9rem;
+        border: 1px solid #333;
+        border-radius: 6px;
+        background: #16213e;
+        color: #e0e0e0;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background 0.15s, border-color 0.15s;
+        font-family: inherit;
+    }
+
+    .memory-btn:hover {
+        background: #1a1a3e;
+        border-color: #4caf50;
+    }
+
+    .memory-btn-back {
+        border-color: #533483;
+    }
+
+    .memory-btn-back:hover {
+        border-color: #7b2d8b;
+        background: #2a1a3e;
+    }
+
+    .memory-btn-primary {
+        background: #4caf50;
+        color: #fff;
+        border-color: #4caf50;
+        font-weight: 600;
+        padding: 0.6rem 1.4rem;
+        font-size: 1rem;
+    }
+
+    .memory-btn-primary:hover {
+        background: #43a047;
+        border-color: #43a047;
+    }
+
+    /* ---- Grid ---- */
+    .memory-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 80px);
+        grid-template-rows: repeat(4, 100px);
+        gap: 8px;
+        padding: 8px;
+        background: #0f0f23;
+        border: 2px solid #1a1a3e;
+        border-radius: 8px;
+    }
+
+    /* ---- Card ---- */
+    .memory-card {
+        width: 80px;
+        height: 100px;
+        perspective: 600px;
+        cursor: pointer;
+    }
+
+    .memory-card--matched {
+        cursor: default;
+    }
+
+    .memory-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.45s ease;
+        transform-style: preserve-3d;
+    }
+
+    .memory-card--flipped .memory-card-inner {
+        transform: rotateY(180deg);
+    }
+
+    .memory-card-front,
+    .memory-card-back {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
+
+    .memory-card-front {
+        background: #1e1e2e;
+        border: 2px solid #333;
+        transform: rotateY(180deg);
+    }
+
+    .memory-card-back {
+        background: var(--accent, #569cd6);
+        border: 2px solid #444;
+    }
+
+    .memory-card-back::after {
+        content: "?";
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.25);
+    }
+
+    .memory-card--matched .memory-card-front {
+        border-color: #4caf50;
+        box-shadow: 0 0 10px rgba(76, 175, 80, 0.3);
+    }
+
+    .memory-card--matched .memory-card-back {
+        display: none;
+    }
+
+    .memory-card-emoji {
+        font-size: 2.2rem;
+        line-height: 1;
+    }
+
+    /* ---- Win Overlay ---- */
+    .memory-win-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(4px);
+        z-index: 10;
+        border-radius: 8px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+    }
+
+    .memory-win--show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .memory-win-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 2rem;
+        background: #1a1a2e;
+        border-radius: 12px;
+        border: 1px solid #333;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        animation: win-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .memory-win-emoji {
+        font-size: 3rem;
+        animation: win-bounce 0.6s ease infinite alternate;
+    }
+
+    .memory-win-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #4caf50;
+        text-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+    }
+
+    .memory-win-stats {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
+        color: #e0e0e0;
+        font-size: 0.95rem;
+    }
+
+    .memory-win-stats strong {
+        color: #4caf50;
+    }
+
+    @@keyframes win-pop {
+        0% {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes win-bounce {
+        0% {
+            transform: translateY(0);
+        }
+        100% {
+            transform: translateY(-8px);
+        }
+    }
+</style>

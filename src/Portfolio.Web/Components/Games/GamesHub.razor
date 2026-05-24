@@ -1,0 +1,207 @@
+@using Portfolio.Web.Components.Games
+
+@* === REGION: Game Selection Header === *@
+<div class="section-header">
+    <h2 class="section-title">Games</h2>
+    <p class="section-subtitle">Mini-games built with Blazor</p>
+</div>
+
+@* === REGION: Game Card Grid (shown when no game is selected) === *@
+@if (selectedGame is null)
+{
+    <div class="projects-grid games-grid">
+        <div class="project-card game-card game-card-selectable" @onclick="() => SelectGame(GameType.Snake)">
+            <div class="game-card-icon">
+                <pre>
+ ╔══════╗
+ ║ ■■■  ║
+ ║ ■    ║
+ ║ ■■■  ║
+ ║   ◆  ║
+ ╚══════╝
+                </pre>
+            </div>
+            <div class="project-card-header">Snake</div>
+            <p class="project-card-desc">Classic snake game. Eat the food, grow longer, and avoid crashing into walls or yourself.</p>
+            <button class="play-btn" @onclick="() => SelectGame(GameType.Snake)" @onclick:stopPropagation="true">▶ Play</button>
+        </div>
+
+        <div class="project-card game-card game-card-selectable" @onclick="() => SelectGame(GameType.Memory)">
+            <div class="game-card-icon">
+                <pre>
+ ┌────────┐
+ │ ?  ?  ?│
+ │ ?  ?  ?│
+ │ ?  ?  ?│
+ └────────┘
+                </pre>
+            </div>
+            <div class="project-card-header">Memory Cards</div>
+            <p class="project-card-desc">Flip cards and match pairs. Test your memory in this classic concentration game.</p>
+            <button class="play-btn" @onclick="() => SelectGame(GameType.Memory)" @onclick:stopPropagation="true">▶ Play</button>
+        </div>
+
+        <div class="project-card game-card game-card-selectable" @onclick="() => SelectGame(GameType.TicTacToe)">
+            <div class="game-card-icon">
+                <pre>
+ ╔═══╤═══╤═══╗
+ ║ X │ O │   ║
+ ╟───┼───┼───╢
+ ║ O │ X │   ║
+ ╟───┼───┼───╢
+ ║   │   │ X ║
+ ╚═══╧═══╧═══╝
+                </pre>
+            </div>
+            <div class="project-card-header">Tic-Tac-Toe</div>
+            <p class="project-card-desc">Classic 3-in-a-row. Play against an unbeatable AI using the Minimax algorithm.</p>
+            <button class="play-btn" @onclick="() => SelectGame(GameType.TicTacToe)" @onclick:stopPropagation="true">▶ Play</button>
+        </div>
+
+        <div class="project-card game-card game-card-selectable" @onclick="() => SelectGame(GameType.TypingTest)">
+            <div class="game-card-icon">
+                <pre>
+ ┌────────┐
+ │ ╔════╗ │
+ │ ║type║ │
+ │ ╚════╝ │
+ │ ↵      │
+ └────────┘
+                </pre>
+            </div>
+            <div class="project-card-header">Typing Test</div>
+            <p class="project-card-desc">Test your typing speed and accuracy. Type words as fast as you can!</p>
+            <button class="play-btn" @onclick="() => SelectGame(GameType.TypingTest)" @onclick:stopPropagation="true">▶ Play</button>
+        </div>
+    </div>
+@* === END REGION: Game Card Grid === *@
+}
+else
+{
+@* === REGION: Active Game View (shown when a game is selected) === *@
+    <div class="game-container">
+        <button class="back-btn" @onclick="DeselectGame">← Back to Games</button>
+
+        <div class="game-content">
+            @switch (selectedGame)
+            {
+                case GameType.Snake:
+                    <SnakeGame OnBack="DeselectGame" />
+                    break;
+                case GameType.Memory:
+                    <MemoryGame OnBack="DeselectGame" />
+                    break;
+                case GameType.TicTacToe:
+                    <TicTacToeGame OnBack="DeselectGame" />
+                    break;
+                case GameType.TypingTest:
+                    <TypingTestGame OnBack="DeselectGame" />
+                    break;
+            }
+        </div>
+    </div>
+    @* === END REGION: Active Game View === *@
+}
+
+@* === REGION: Code-Behind === *@
+@code {
+    /// <summary>Available game types that can be selected and played.</summary>
+    private enum GameType
+    {
+        Snake,
+        Memory,
+        TicTacToe,
+        TypingTest
+    }
+
+    /// <summary>The currently selected game, or null if on the hub selection screen.</summary>
+    private GameType? selectedGame;
+
+    /// <summary>Selects a game and switches to the active game view.</summary>
+    /// <param name="game">The game type to play.</param>
+    private void SelectGame(GameType game)
+    {
+        selectedGame = game;
+    }
+
+    /// <summary>Deselects the current game and returns to the hub selection screen.</summary>
+    private void DeselectGame()
+    {
+        selectedGame = null;
+    }
+}
+
+@* === REGION: Inline Styles (game hub layout) === *@
+<style>
+    .game-card-selectable {
+        cursor: pointer;
+    }
+
+    .game-card-icon pre {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 0.65rem;
+        line-height: 1.25;
+        color: var(--accent);
+        margin-bottom: 12px;
+        overflow: hidden;
+        font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+        text-align: center;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .play-btn {
+        display: inline-block;
+        padding: 8px 22px;
+        background: var(--accent);
+        color: var(--bg);
+        border: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s ease, transform 0.15s ease;
+    }
+
+    .play-btn:hover {
+        background: var(--accent-hover);
+        transform: translateY(-2px);
+    }
+
+    .game-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem 0;
+    }
+
+    .game-content {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .back-btn {
+        align-self: flex-start;
+        padding: 8px 18px;
+        background: var(--card-bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .back-btn:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+</style>

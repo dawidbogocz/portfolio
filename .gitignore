@@ -1,0 +1,21 @@
+# .NET build artifacts
+bin/
+obj/
+publish/
+
+# IDE files
+.vs/
+.vscode/
+*.sln.ide/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Blazor publish output
+wwwroot/_framework/*.wasm
+wwwroot/_framework/*.wasm.gz
+wwwroot/_framework/*.wasm.br
+wwwroot/_framework/*.pdb
+wwwroot/_framework/*.pdb.gz
+wwwroot/_framework/*.pdb.br

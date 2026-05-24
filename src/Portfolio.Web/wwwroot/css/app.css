@@ -884,3 +884,17 @@ img {
 #back-to-top.visible:hover {
     opacity: 1;
 }
+
+/* ----------------------------------------------------------
+   19. Scroll-Up Fade Effect (terminal feature)
+   ----------------------------------------------------------
+   .fade-scroll-content wraps all page sections below the hero terminal.
+   It starts fully transparent (opacity: 0) so only the terminal hero is
+   visible on initial load. The initScrollFade JS function progressively
+   raises this opacity to 1 as the user scrolls past the hero, creating
+   a smooth content reveal effect. */
+.fade-scroll-content {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    will-change: opacity;
+}
