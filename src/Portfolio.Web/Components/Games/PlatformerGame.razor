@@ -1,0 +1,235 @@
+@inject IJSRuntime JS
+@inject HttpClient Http
+@implements IAsyncDisposable
+
+<div class="platformer-wrapper">
+    <div class="platformer-header">
+        <h3>Procedural Platformer</h3>
+        <div class="platformer-controls">
+            <span class="badge-score" id="score-display-@ElementId">Score: 0</span>
+            <span class="badge-score">Seed: <span id="seed-display-@ElementId">--</span></span>
+            <button class="restart-btn" @onclick="NewLevel">New Level</button>
+        </div>
+    </div>
+    <div class="platformer-canvas-container">
+        <canvas id="@ElementId" class="platformer-canvas" width="800" height="450"></canvas>
+    </div>
+    <div class="platformer-footer">
+        <span class="key-hint">W / Up / Space</span> Jump
+        <span class="key-hint">A / D</span> or <span class="key-hint">Left / Right</span> Move
+        <span class="key-hint">R</span> New Level
+    </div>
+    <div class="platformer-footer-note">
+        Each level is generated on the server by seed. Collect coins, reach the end, and don't fall!
+    </div>
+
+    @if (statusMessage != null)
+    {
+        <div class="platformer-status">@statusMessage</div>
+    }
+</div>
+
+<style>
+    .platformer-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        max-width: 840px;
+        margin: 0 auto;
+    }
+    .platformer-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+    .platformer-header h3 {
+        margin: 0;
+        color: var(--accent);
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+        font-size: 1.1rem;
+    }
+    .platformer-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .badge-score {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 4px 12px;
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+        font-size: 0.85rem;
+        color: var(--text);
+    }
+    .restart-btn {
+        padding: 6px 16px;
+        background: var(--accent);
+        color: var(--bg);
+        border: none;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s ease;
+    }
+    .restart-btn:hover {
+        background: var(--accent-hover);
+    }
+    .platformer-canvas-container {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    .platformer-canvas {
+        display: block;
+        width: 100%;
+        max-width: 800px;
+        height: auto;
+        aspect-ratio: 800 / 450;
+    }
+    .platformer-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.2rem;
+        justify-content: center;
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        font-family: 'JetBrains Mono', 'Consolas', monospace;
+    }
+    .platformer-footer-note {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        opacity: 0.7;
+    }
+    .key-hint {
+        display: inline-block;
+        padding: 1px 6px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-size: 0.75rem;
+        color: var(--accent);
+        font-weight: 600;
+    }
+    .platformer-status {
+        padding: 8px 16px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        font-family: 'JetBrains Mono', monospace;
+    }
+</style>
+
+@code {
+    private string ElementId => $"platformer-canvas-{Guid.NewGuid():N}";
+    private IJSObjectReference? _jsModule;
+    private Timer? _scoreTimer;
+    private string? statusMessage;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "../js/platformer.js");
+            await LoadNewLevel();
+        }
+    }
+
+    private async Task LoadNewLevel()
+    {
+        statusMessage = "Generating level...";
+        StateHasChanged();
+
+        try
+        {
+            var response = await Http.GetAsync("/api/game/level");
+            response.EnsureSuccessStatusCode();
+            var levelData = await response.Content.ReadAsStringAsync();
+
+            // Start timer to detect game over
+            _scoreTimer?.Dispose();
+            _scoreTimer = new Timer(async _ =>
+            {
+                try
+                {
+                    if (_jsModule != null)
+                    {
+                        var alive = await _jsModule.InvokeAsync<bool>("isAlive");
+                        if (!alive)
+                        {
+                            var score = await _jsModule.InvokeAsync<int>("getScore");
+                            await SubmitScore(score);
+                        }
+                    }
+                }
+                catch { }
+            }, null, 0, 500);
+
+            await _jsModule!.InvokeVoidAsync("loadLevel", ElementId, levelData);
+            var seed = await _jsModule.InvokeAsync<int>("getSeed");
+            await JS.InvokeVoidAsync("portfolio.updateElementText", $"seed-display-{ElementId}", seed.ToString());
+
+            statusMessage = null;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Failed to load level: {ex.Message}";
+            StateHasChanged();
+        }
+    }
+
+    private async Task SubmitScore(int score)
+    {
+        _scoreTimer?.Dispose();
+        _scoreTimer = null;
+
+        try
+        {
+            var seed = await _jsModule!.InvokeAsync<int>("getSeed");
+            var payload = new { playerName = "DzeyD", score, seed };
+            var json = System.Text.Json.JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            await Http.PostAsync("/api/game/score", content);
+
+            // Fetch leaderboard
+            var lbResponse = await Http.GetAsync("/api/game/leaderboard?top=5");
+            if (lbResponse.IsSuccessStatusCode)
+            {
+                var lbData = await lbResponse.Content.ReadAsStringAsync();
+                await _jsModule!.InvokeVoidAsync("showLeaderboard", lbData);
+            }
+        }
+        catch { }
+    }
+
+    private async void NewLevel()
+    {
+        await LoadNewLevel();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _scoreTimer?.Dispose();
+        try
+        {
+            if (_jsModule != null)
+            {
+                await _jsModule.InvokeVoidAsync("stop");
+                await _jsModule.DisposeAsync();
+            }
+        }
+        catch { }
+        GC.SuppressFinalize(this);
+    }
+}

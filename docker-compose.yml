@@ -1,0 +1,8 @@
+services:
+  platformer-api:
+    build: ./src/Platformer.Api
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
