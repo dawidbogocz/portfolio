@@ -5,6 +5,7 @@ var canvas, ctx;
 var gameRunning = false;
 var animFrameId = null;
 var keys = {};
+var prevKeys = {};
 var camera = { x: 0, y: 0 };
 var player, platforms, coins, enemies, traps;
 var levelData = null;
@@ -166,15 +167,21 @@ function update() {
 
   player.vx = moveX * 0.8;
 
+  // Edge detection for jump keys (only fire on key-down, not held)
+  var jumpDown = (keys['w'] || keys['W'] || keys[' ']) && !(prevKeys['w'] || prevKeys['W'] || prevKeys[' ']);
+  // Save current key state for next frame's edge detection
+  prevKeys['w'] = keys['w'];
+  prevKeys['W'] = keys['W'];
+  prevKeys[' '] = keys[' '];
+
   // Jump (W or Space, no Up arrow) -- double jump allowed
-  var jumpPressed = (keys['w'] || keys['W'] || keys[' ']);
-  if (jumpPressed && player.onGround) {
+  if (jumpDown && player.onGround) {
     player.vy = stompMomentum !== 0 ? stompMomentum : JUMP_SPEED;
     player.onGround = false;
     player.jumpsUsed = 1;
     stompMomentum = 0;
-  } else if (jumpPressed && !player.onGround && player.jumpsUsed < 2 && player.vy >= -2) {
-    // Double jump: only when near the peak or descending, max 2 jumps total
+  } else if (jumpDown && !player.onGround && player.jumpsUsed < 2 && player.vy >= -2) {
+    // Double jump: press again near the peak or descending, max 2 jumps total
     player.vy = JUMP_SPEED;
     player.jumpsUsed = 2;
   }

@@ -71,38 +71,36 @@ public class LevelGenerator
                 groundSegmentIndex++;
                 platforms.Add(new Platform { X = chunkStartX, Y = currentGroundY, W = groundW, H = GroundHeight, Theme = "ground" });
 
-                // Safety platform below gaps
-                if (groundW < ChunkSize - 20)
-                {
-                    int gapWidth = ChunkSize - groundW;
-                    if (gapWidth > 60)
-                    {
-                        platforms.Add(new Platform
-                        {
-                            X = chunkStartX + groundW + 10,
-                            Y = currentGroundY + 30,
-                            W = gapWidth - 20,
-                            H = GroundHeight / 2,
-                            Theme = "rest"
-                        });
-                    }
-                }
-
                 hasOverheadPlatformAboveGap = false;
             }
             else
             {
-                // NO GROUND THIS CHUNK -- full gap. Bridge platform only.
+                // NO GROUND THIS CHUNK -- gap. Player must jump across or die.
                 int bridgeX = chunkStartX + ChunkSize / 2 - 40;
+
+                // Bridge platform at ground level
                 platforms.Add(new Platform { X = bridgeX, Y = currentGroundY, W = 80, H = GroundHeight, Theme = "challenge" });
-                platforms.Add(new Platform
+
+                // Stepping-stone platform slightly lower so player can reach it from the bridge
+                platforms.Add(new Platform { X = bridgeX - 30, Y = currentGroundY - 30, W = 60, H = 24, Theme = "challenge" });
+
+                // Second stepping stone further into the gap at medium height
+                int stone2X = bridgeX + 100 + rng.Next(0, 40);
+                int stone2W = rng.Next(50, 80);
+                int stone2Y = currentGroundY - rng.Next(50, 80);
+                platforms.Add(new Platform { X = stone2X, Y = stone2Y, W = stone2W, H = 24, Theme = "challenge" });
+
+                // Guide coins on stepping stones
+                for (int gc = 0; gc < 2; gc++)
                 {
-                    X = chunkStartX + 20,
-                    Y = currentGroundY + 50,
-                    W = ChunkSize - 40,
-                    H = GroundHeight / 2,
-                    Theme = "rest"
-                });
+                    coinIndex++;
+                    coins.Add(new Coin
+                    {
+                        X = bridgeX - 10 + gc * 25,
+                        Y = currentGroundY - 55 - gc * 5,
+                        Id = $"coin_{coinIndex}"
+                    });
+                }
 
                 // Advance lastPlatformEndX past this gap so no overhead bleeds into the hole
                 lastPlatformEndX = chunkStartX + ChunkSize + rng.Next(50, 150);
@@ -177,72 +175,100 @@ public class LevelGenerator
                     platforms.Add(new Platform { X = platX, Y = platY, W = platW, H = GroundHeight, Theme = theme });
                     lastPlatformEndX = platX + platW;
 
+                    // Determine safe zone for coins and enemies (clear of traps)
+                    int safeStart = platX + 10;
+                    int safeEnd = platX + platW - 10;
+
+                    // === TRAPS (spikes on platforms) ===
+                    // Compute trap FIRST so coins and enemies avoid it
+                    bool hasTrap = theme == "challenge" && platW >= 100 && rng.NextDouble() < 0.5;
+                    int trapSpikeW = 0, trapSpikeX = 0;
+                    bool trapLeftSide = false;
+
+                    if (hasTrap)
+                    {
+                        int maxSpikeW = Math.Min(60, platW - 70);
+                        if (maxSpikeW >= 20)
+                        {
+                            trapSpikeW = rng.Next(20, maxSpikeW + 1);
+                            trapLeftSide = rng.NextDouble() < 0.5;
+                            trapSpikeX = trapLeftSide ? platX + 10 : platX + platW - trapSpikeW - 10;
+                            traps.Add(new TrapData { X = trapSpikeX, Y = platY - 8, W = trapSpikeW, H = 8 });
+
+                            // Shrink safe zone away from trap side
+                            if (trapLeftSide)
+                                safeStart = trapSpikeX + trapSpikeW + 5;
+                            else
+                                safeEnd = trapSpikeX - 5;
+                        }
+                        else
+                        {
+                            hasTrap = false;
+                        }
+                    }
+
                     // === COINS ===
-                    // Coins arc above the platform -- always reachable
+                    // Only in the safe zone (never on top of traps)
                     int coinsOnPlat = rng.Next(1, 4);
                     int coinArcHeight = Math.Min(60, platY - currentGroundY - 20);
                     if (coinArcHeight < 20) coinArcHeight = 20;
 
-                    for (int c = 0; c < coinsOnPlat; c++)
+                    int coinRange = safeEnd - safeStart - 20;
+                    if (coinRange > 0)
                     {
-                        coinIndex++;
-                        int coinX = rng.Next(platX + 15, platX + platW - 15);
-                        int coinY = platY - rng.Next(Math.Max(15, coinArcHeight - 15), coinArcHeight + 10);
-                        coinY = Math.Max(coinY, platY - 80); // never too high above the platform
-                        coins.Add(new Coin { X = coinX, Y = coinY, Id = $"coin_{coinIndex}" });
+                        for (int c = 0; c < coinsOnPlat; c++)
+                        {
+                            coinIndex++;
+                            int coinX = rng.Next(safeStart + 5, Math.Max(safeStart + 6, safeEnd - 5));
+                            int coinY = platY - rng.Next(Math.Max(15, coinArcHeight - 15), coinArcHeight + 10);
+                            coinY = Math.Max(coinY, platY - 80);
+                            coins.Add(new Coin { X = coinX, Y = coinY, Id = $"coin_{coinIndex}" });
+                        }
+                    }
+
+                    // Guide coins on the safe side when there's a trap (visual cue to land there)
+                    if (hasTrap && (safeEnd - safeStart) >= 30)
+                    {
+                        int guideX = trapLeftSide ? safeEnd - 25 : safeStart + 5;
+                        for (int tc = 0; tc < 2; tc++)
+                        {
+                            coinIndex++;
+                            coins.Add(new Coin
+                            {
+                                X = guideX + tc * 15,
+                                Y = platY - 30 - tc * 5,
+                                Id = $"coin_{coinIndex}"
+                            });
+                        }
                     }
 
                     // === ENEMIES ===
-                    if ((theme == "normal" || theme == "challenge") && platW >= 70 && rng.NextDouble() < 0.5)
+                    // Only in the safe zone (never patrol into traps)
+                    if ((theme == "normal" || theme == "challenge") && (safeEnd - safeStart) >= 50 && rng.NextDouble() < 0.5)
                     {
                         enemyIndex++;
                         int eW = 28, eH = 24;
-                        int maxEnemyX = Math.Max(platX + 10, platX + platW - eW - 10);
-                        int eX = rng.Next(platX + 10, maxEnemyX + 1);
+                        int maxEnemyX = Math.Max(safeStart, safeEnd - eW);
+                        int eX = rng.Next(safeStart, maxEnemyX + 1);
                         int eY = platY - eH;
                         double speed = 0.8 + rng.NextDouble() * 1.2;
-                        int maxPatrol = Math.Max(30, Math.Min(platW - 20, 80));
+                        int maxPatrol = Math.Max(30, Math.Min(safeEnd - safeStart - 20, 80));
                         int patrolRange = rng.Next(Math.Min(30, maxPatrol), maxPatrol + 1);
 
                         enemies.Add(new EnemyData
                         {
                             X = eX, Y = eY, W = eW, H = eH,
                             Speed = Math.Round(speed, 1),
-                            PatrolStart = eX - patrolRange / 2,
-                            PatrolEnd = eX + patrolRange / 2
+                            PatrolStart = Math.Max(safeStart, eX - patrolRange / 2),
+                            PatrolEnd = Math.Min(safeEnd, eX + patrolRange / 2)
                         });
                     }
-
-                    // === TRAPS (spikes on platforms) ===
-                    if (theme == "challenge" && rng.NextDouble() < 0.5 && platW >= 100)
-                    {
-                        // RULE: trap width must leave at least 50px safe landing zone on each side
-                        int maxSpikeW = Math.Min(60, platW - 70);
-                        if (maxSpikeW >= 20)
-                        {
-                            int spikeW = rng.Next(20, maxSpikeW + 1);
-                            // Place spikes on one side, leaving the other side safe
-                            bool leftSide = rng.NextDouble() < 0.5;
-                            int spikeX = leftSide
-                                ? platX + 10
-                                : platX + platW - spikeW - 10;
-                            traps.Add(new TrapData { X = spikeX, Y = platY - 8, W = spikeW, H = 8 });
-
-                            // RULE: place coins on the safe side to guide the player
-                            int safeSideX = leftSide ? platX + platW - 40 : platX + 10;
-                            for (int tc = 0; tc < 2; tc++)
-                            {
-                                coinIndex++;
-                                coins.Add(new Coin
-                                {
-                                    X = safeSideX + tc * 15,
-                                    Y = platY - 30 - tc * 5,
-                                    Id = $"coin_{coinIndex}"
-                                });
-                            }
-                        }
-                    }
                 }
+
+                // Clamp lastPlatformEndX so it doesn't bleed into the next chunk (which might be a gap)
+                int chunkCeiling = (chunk + 1) * ChunkSize - 20;
+                if (lastPlatformEndX > chunkCeiling)
+                    lastPlatformEndX = chunkCeiling;
             }
 
             // === GROUND-LEVEL SPIKE GAUNTLET ===
