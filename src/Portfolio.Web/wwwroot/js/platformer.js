@@ -8,6 +8,7 @@ var keys = {};
 var camera = { x: 0, y: 0 };
 var player, platforms, coins, enemies, traps;
 var levelData = null;
+var _originalLevelStr = null;
 var currentScore = 0;
 var currentSeed = 0;
 var gameOver = false;
@@ -18,6 +19,7 @@ var leaderboardData = null;
 var killedCount = 0;
 var stars = [];
 var parallaxOffset = 0;
+var floatingTexts = [];
 
 // Physics constants
 var GRAVITY = 0.5;
@@ -62,6 +64,7 @@ export function loadLevel(canvasId, dataStr) {
   }
 
   levelData = typeof dataStr === 'string' ? JSON.parse(dataStr) : dataStr;
+  _originalLevelStr = typeof dataStr === 'string' ? dataStr : JSON.stringify(dataStr);
   currentSeed = levelData.seed || 0;
   platforms = levelData.platforms ? levelData.platforms.slice() : [];
   coins = levelData.coins ? levelData.coins.slice() : [];
@@ -98,8 +101,8 @@ export function loadLevel(canvasId, dataStr) {
 }
 
 export function restart() {
-  if (levelData) {
-    loadLevel(canvas ? canvas.id : '', JSON.stringify(levelData));
+  if (_originalLevelStr) {
+    loadLevel(canvas ? canvas.id : '', _originalLevelStr);
   }
 }
 
@@ -231,6 +234,7 @@ function update() {
         enemy.deathTimer = 0;
         killedCount++;
         currentScore += 25;
+        floatingTexts.push({ x: enemy.x + 10, y: enemy.y - 10, text: '+25', life: 40, vy: -1.5 });
         stompMomentum = STOMP_BOUNCE;
         player.vy = STOMP_BOUNCE;
         player.onGround = false;
@@ -283,6 +287,15 @@ function update() {
   // Fall off screen = game over
   if (player.y > (levelData ? levelData.height : 450) + 100) {
     gameOver = true;
+  }
+
+  // Update floating texts
+  for (var ft = floatingTexts.length - 1; ft >= 0; ft--) {
+    floatingTexts[ft].y += floatingTexts[ft].vy;
+    floatingTexts[ft].life--;
+    if (floatingTexts[ft].life <= 0) {
+      floatingTexts.splice(ft, 1);
+    }
   }
 
   // Reached end
@@ -462,6 +475,18 @@ function render() {
   ctx.fillStyle = '#0d1117';
   ctx.fillRect(player.x + 4, player.y + 8, 5, 5);
   ctx.fillRect(player.x + 14, player.y + 8, 5, 5);
+
+  // Floating texts (world-space popups)
+  ctx.textAlign = 'center';
+  for (var ft = 0; ft < floatingTexts.length; ft++) {
+    var f = floatingTexts[ft];
+    ctx.globalAlpha = Math.min(1, f.life / 20);
+    ctx.fillStyle = '#ffcc00';
+    ctx.font = 'bold 16px JetBrains Mono, monospace';
+    ctx.fillText(f.text, f.x + 10, f.y);
+  }
+  ctx.globalAlpha = 1;
+  ctx.textAlign = 'left';
 
   ctx.restore();
 

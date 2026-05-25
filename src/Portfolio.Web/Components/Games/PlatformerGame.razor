@@ -170,22 +170,23 @@
                 if (_disposed || cts.IsCancellationRequested || _jsModule == null) return;
                 try
                 {
-                    var alive = await _jsModule.InvokeAsync<bool>("isAlive");
+                    var alive = await _jsModule.InvokeAsync<bool>("isAlive", cts.Token);
                     if (!alive)
                     {
-                        var score = await _jsModule.InvokeAsync<int>("getScore");
-                        var kills = await _jsModule.InvokeAsync<int>("getKills");
+                        var score = await _jsModule.InvokeAsync<int>("getScore", cts.Token);
+                        var kills = await _jsModule.InvokeAsync<int>("getKills", cts.Token);
                         await SubmitScore(score, kills);
                     }
                 }
                 catch (JSException) { /* component disposed - safe to ignore */ }
-                catch (TaskCanceledException) { /* disposed - safe to ignore */ }
+                catch (OperationCanceledException) { /* component disposed - cancelled cleanly */ }
+                catch (ObjectDisposedException) { /* disposed */ }
                 catch { }
             }, null, 0, 500);
 
-            await _jsModule!.InvokeVoidAsync("start", ElementId);
-            await _jsModule!.InvokeVoidAsync("loadLevel", ElementId, levelData);
-            var seed = await _jsModule.InvokeAsync<int>("getSeed");
+            await _jsModule!.InvokeVoidAsync("start", _cts!.Token, ElementId);
+            await _jsModule!.InvokeVoidAsync("loadLevel", _cts!.Token, ElementId, levelData);
+            var seed = await _jsModule.InvokeAsync<int>("getSeed", _cts!.Token);
             await JS.InvokeVoidAsync("portfolio.updateElementText", $"seed-display-{ElementId}", seed.ToString());
 
             statusMessage = null;
@@ -209,7 +210,7 @@
 
         try
         {
-            var seed = await _jsModule!.InvokeAsync<int>("getSeed");
+            var seed = await _jsModule!.InvokeAsync<int>("getSeed", _cts!.Token);
             var payload = new { playerName = "DzeyD", score, seed, kills };
             var json = System.Text.Json.JsonSerializer.Serialize(payload);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
@@ -220,11 +221,11 @@
             if (lbResponse.IsSuccessStatusCode)
             {
                 var lbData = await lbResponse.Content.ReadAsStringAsync();
-                await _jsModule!.InvokeVoidAsync("showLeaderboard", lbData);
+                await _jsModule!.InvokeVoidAsync("showLeaderboard", _cts!.Token, lbData);
             }
         }
         catch (JSException) { /* disposed */ }
-        catch (TaskCanceledException) { /* disposed */ }
+        catch (OperationCanceledException) { /* disposed */ }
         catch { }
     }
 
