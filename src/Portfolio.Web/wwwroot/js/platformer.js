@@ -85,7 +85,8 @@ export function loadLevel(canvasId, dataStr) {
     h: 32,
     vx: 0,
     vy: 0,
-    onGround: false
+    onGround: false,
+    jumpsUsed: 0
   };
 
   camera = { x: 0, y: 0 };
@@ -165,11 +166,17 @@ function update() {
 
   player.vx = moveX * 0.8;
 
-  // Jump (W or Space, no Up arrow)
-  if ((keys['w'] || keys['W'] || keys[' ']) && player.onGround) {
+  // Jump (W or Space, no Up arrow) -- double jump allowed
+  var jumpPressed = (keys['w'] || keys['W'] || keys[' ']);
+  if (jumpPressed && player.onGround) {
     player.vy = stompMomentum !== 0 ? stompMomentum : JUMP_SPEED;
     player.onGround = false;
+    player.jumpsUsed = 1;
     stompMomentum = 0;
+  } else if (jumpPressed && !player.onGround && player.jumpsUsed < 2 && player.vy >= -2) {
+    // Double jump: only when near the peak or descending, max 2 jumps total
+    player.vy = JUMP_SPEED;
+    player.jumpsUsed = 2;
   }
 
   // Gravity
@@ -204,6 +211,7 @@ function update() {
         player.y = pl.y - player.h;
         player.vy = 0;
         player.onGround = true;
+        player.jumpsUsed = 0;
       } else if (player.vy < 0) {
         player.y = pl.y + pl.h;
         player.vy = 0;
