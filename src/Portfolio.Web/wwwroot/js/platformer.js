@@ -21,6 +21,7 @@ var killedCount = 0;
 var stars = [];
 var parallaxOffset = 0;
 var floatingTexts = [];
+var gameTimer = 0;
 
 // Physics constants
 var GRAVITY = 0.5;
@@ -92,6 +93,7 @@ export function loadLevel(canvasId, dataStr) {
 
   camera = { x: 0, y: 0 };
   currentScore = 0;
+  gameTimer = 0;
   gameOver = false;
   reachedEnd = false;
   displayLeaderboard = false;
@@ -111,6 +113,8 @@ export function restart() {
 export function getScore() { return currentScore; }
 
 export function getKills() { return killedCount; }
+
+export function getTime() { return gameTimer; }
 
 export function getSeed() { return currentSeed; }
 
@@ -312,6 +316,9 @@ function update() {
       floatingTexts.splice(ft, 1);
     }
   }
+
+  // Timer (in seconds)
+  gameTimer += 1 / 60;
 
   // Reached end
   if (levelData && player.x >= levelData.endX - 20) {
@@ -515,6 +522,12 @@ function render() {
   var collected = countKeys(collectedCoinIds);
   ctx.fillText('Coins: ' + collected + '/' + totalCoins, 10, 58);
 
+  // Timer (right-aligned)
+  var timeStr = formatTime(gameTimer);
+  ctx.textAlign = 'right';
+  ctx.fillText(timeStr, w - 10, 22);
+  ctx.textAlign = 'left';
+
   // Game over screen
   if (gameOver) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
@@ -522,23 +535,27 @@ function render() {
     ctx.fillStyle = '#ff4a6a';
     ctx.font = '28px JetBrains Mono, monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('GAME OVER', w / 2, h / 2 - 30);
+    ctx.fillText('GAME OVER', w / 2, h / 2 - 35);
     ctx.fillStyle = '#8b949e';
     ctx.font = '16px JetBrains Mono, monospace';
     ctx.fillText('Score: ' + currentScore + '  Kills: ' + killedCount, w / 2, h / 2 + 5);
-    ctx.fillText('[R]etry  /  [N]ew Level', w / 2, h / 2 + 35);
+    ctx.fillText('Time: ' + formatTime(gameTimer), w / 2, h / 2 + 25);
+    ctx.fillText('[R]etry  /  [N]ew Level', w / 2, h / 2 + 55);
     ctx.textAlign = 'left';
   } else if (reachedEnd) {
+    var timeBonus = Math.max(0, Math.floor(300 - gameTimer) * 10);
+    var finalScore = currentScore + timeBonus;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = '#3dd68c';
     ctx.font = '28px JetBrains Mono, monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('LEVEL COMPLETE', w / 2, h / 2 - 30);
+    ctx.fillText('LEVEL COMPLETE', w / 2, h / 2 - 35);
     ctx.fillStyle = '#8b949e';
     ctx.font = '16px JetBrains Mono, monospace';
-    ctx.fillText('Score: ' + currentScore + '  Kills: ' + killedCount, w / 2, h / 2 + 5);
-    ctx.fillText('[R]etry  /  [N]ew Level', w / 2, h / 2 + 35);
+    ctx.fillText('Score: ' + currentScore + '  Time Bonus: +' + timeBonus, w / 2, h / 2 + 5);
+    ctx.fillText('Total: ' + finalScore + '  Kills: ' + killedCount + '  Time: ' + formatTime(gameTimer), w / 2, h / 2 + 25);
+    ctx.fillText('[R]etry  /  [N]ew Level', w / 2, h / 2 + 55);
     ctx.textAlign = 'left';
   }
 
@@ -571,4 +588,10 @@ function countKeys(obj) {
   var n = 0;
   for (var k in obj) { if (obj.hasOwnProperty(k)) n++; }
   return n;
+}
+
+function formatTime(seconds) {
+  var mins = Math.floor(seconds / 60);
+  var secs = Math.floor(seconds % 60);
+  return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
 }

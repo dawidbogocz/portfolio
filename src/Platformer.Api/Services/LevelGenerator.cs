@@ -81,11 +81,12 @@ public class LevelGenerator
                 // Bridge platform at ground level
                 platforms.Add(new Platform { X = bridgeX, Y = currentGroundY, W = 80, H = GroundHeight, Theme = "challenge" });
 
-                // Stepping-stone platform slightly lower so player can reach it from the bridge
-                platforms.Add(new Platform { X = bridgeX - 30, Y = currentGroundY - 30, W = 60, H = 24, Theme = "challenge" });
+                // Stepping-stone platform on the other side of the bridge so no overlap with the edge
+                int stone1X = bridgeX + 90 + rng.Next(0, 20);
+                platforms.Add(new Platform { X = stone1X, Y = currentGroundY - 30, W = 60, H = 24, Theme = "challenge" });
 
                 // Second stepping stone further into the gap at medium height
-                int stone2X = bridgeX + 100 + rng.Next(0, 40);
+                int stone2X = stone1X + 80 + rng.Next(0, 30);
                 int stone2W = rng.Next(50, 80);
                 int stone2Y = currentGroundY - rng.Next(50, 80);
                 platforms.Add(new Platform { X = stone2X, Y = stone2Y, W = stone2W, H = 24, Theme = "challenge" });
@@ -312,10 +313,12 @@ public class LevelGenerator
         }
 
         // === END ZONE ===
-        // Ground under the end zone so the player doesn't fall into a hole
         int endZoneStartX = lastPlatformEndX + 60;
         int endZoneEndX = endZoneStartX + 45 * 2 + 80 + 120 + 60;
-        platforms.Add(new Platform { X = endZoneStartX - 20, Y = GroundY, W = endZoneEndX - endZoneStartX + 40, H = GroundHeight, Theme = "ground" });
+
+        // Ground under the end zone so the player doesn't fall into a hole
+        int endGroundX = Math.Max(levelWidth, endZoneStartX - 20);
+        platforms.Add(new Platform { X = endGroundX, Y = GroundY, W = endZoneEndX - endGroundX + 20, H = GroundHeight, Theme = "ground" });
 
         // Gradual staircase, each step within single-jump range
         int endStepX = endZoneStartX;

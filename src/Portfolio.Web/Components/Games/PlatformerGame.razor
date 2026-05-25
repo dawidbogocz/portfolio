@@ -175,7 +175,8 @@
                     {
                         var score = await _jsModule.InvokeAsync<int>("getScore", cts.Token);
                         var kills = await _jsModule.InvokeAsync<int>("getKills", cts.Token);
-                        await SubmitScore(score, kills);
+                        var time = await _jsModule.InvokeAsync<double>("getTime", cts.Token);
+                        await SubmitScore(score, kills, time);
                     }
                 }
                 catch (JSException) { /* component disposed - safe to ignore */ }
@@ -202,7 +203,7 @@
         }
     }
 
-    private async Task SubmitScore(int score, int kills)
+    private async Task SubmitScore(int score, int kills, double time)
     {
         _scoreTimer?.Dispose();
         _scoreTimer = null;
@@ -211,7 +212,9 @@
         try
         {
             var seed = await _jsModule!.InvokeAsync<int>("getSeed", _cts!.Token);
-            var payload = new { playerName = "DzeyD", score, seed, kills };
+            int timeBonus = Math.Max(0, (int)(300 - time) * 10);
+            int totalScore = score + timeBonus;
+            var payload = new { playerName = "DzeyD", score = totalScore, seed, kills, timeSeconds = (int)time };
             var json = System.Text.Json.JsonSerializer.Serialize(payload);
             var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
             await Http.PostAsync("/api/game/score", content, _cts!.Token);
