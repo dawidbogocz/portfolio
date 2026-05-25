@@ -19,3 +19,6 @@ wwwroot/_framework/*.wasm.br
 wwwroot/_framework/*.pdb
 wwwroot/_framework/*.pdb.gz
 wwwroot/_framework/*.pdb.br
+
+# SQLite database created by Platformer.Api at runtime
+data/

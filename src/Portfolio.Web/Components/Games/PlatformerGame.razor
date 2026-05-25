@@ -131,7 +131,7 @@
 </style>
 
 @code {
-    private string ElementId => $"platformer-canvas-{Guid.NewGuid():N}";
+    private string ElementId = $"platformer-canvas-{Guid.NewGuid():N}";
     private IJSObjectReference? _jsModule;
     private Timer? _scoreTimer;
     private string? statusMessage;

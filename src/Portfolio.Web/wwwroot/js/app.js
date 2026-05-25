@@ -94,6 +94,31 @@ window.portfolio = {
     }
   },
 
+  // === UPDATE ELEMENT TEXT ===
+  /**
+   * Replaces the text content of an element by ID.
+   * Used by the platformer game to update the score display from C#.
+   * @param {string} id - The element ID.
+   * @param {string} text - The new text content.
+   */
+  updateElementText: function(id, text) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.textContent = text;
+    }
+  },
+
+  // === FOCUS ELEMENT ===
+  /**
+   * Focuses a DOM element.
+   * @param {HTMLElement} el - The element to focus.
+   */
+  focusElement: function(el) {
+    if (el) {
+      el.focus();
+    }
+  },
+
   // === SCROLL-UP FADE EFFECT ===
   /**
    * Fades in the content sections below the hero as the user scrolls down.
