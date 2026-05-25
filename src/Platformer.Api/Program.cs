@@ -47,6 +47,7 @@ app.MapPost("/api/game/score", async (PlayerScoreRequest request, GameDbContext 
         PlayerName = request.PlayerName,
         Score = request.Score,
         Seed = request.Seed,
+        Kills = request.Kills,
         DateAchieved = DateTime.UtcNow
     };
     db.PlayerScores.Add(score);
@@ -66,6 +67,7 @@ app.MapGet("/api/game/leaderboard", async (int? top, GameDbContext db) =>
             s.PlayerName,
             s.Score,
             s.Seed,
+            s.Kills,
             s.DateAchieved
         })
         .ToListAsync();
@@ -75,4 +77,4 @@ app.MapGet("/api/game/leaderboard", async (int? top, GameDbContext db) =>
 app.Run();
 
 // Request DTO for POST /api/game/score
-record PlayerScoreRequest(string PlayerName, int Score, int Seed);
+record PlayerScoreRequest(string PlayerName, int Score, int Seed, int Kills);

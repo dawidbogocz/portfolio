@@ -6,5 +6,6 @@ public class PlayerScore
     public string PlayerName { get; set; } = string.Empty;
     public int Score { get; set; }
     public int Seed { get; set; }
+    public int Kills { get; set; }
     public DateTime DateAchieved { get; set; }
 }
