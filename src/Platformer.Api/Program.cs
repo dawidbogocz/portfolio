@@ -5,6 +5,13 @@ using Platformer.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var dbPath = builder.Configuration.GetValue<string>("Database:Path") ?? "data/game.db";
+
+// Ensure the data directory exists
+var dbDir = Path.GetDirectoryName(Path.GetFullPath(dbPath));
+if (!string.IsNullOrEmpty(dbDir) && !Directory.Exists(dbDir))
+    Directory.CreateDirectory(dbDir);
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -16,7 +23,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<GameDbContext>(options =>
-    options.UseSqlite("Data Source=/app/data/game.db"));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 builder.Services.AddSingleton<LevelGenerator>();
 
