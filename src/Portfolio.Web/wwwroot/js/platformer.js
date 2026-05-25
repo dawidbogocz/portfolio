@@ -13,7 +13,7 @@ var currentSeed = 0;
 var gameOver = false;
 var reachedEnd = false;
 var collectedCoinIds = {};
-var showLeaderboard = false;
+var displayLeaderboard = false;
 var leaderboardData = null;
 
 // Physics constants
@@ -79,7 +79,7 @@ export function loadLevel(canvasId, dataStr) {
   currentScore = 0;
   gameOver = false;
   reachedEnd = false;
-  showLeaderboard = false;
+  displayLeaderboard = false;
   leaderboardData = null;
   gameRunning = true;
 
@@ -101,7 +101,7 @@ export function isAlive() { return !gameOver && !reachedEnd; }
 
 export function showLeaderboard(dataStr) {
   leaderboardData = typeof dataStr === 'string' ? JSON.parse(dataStr) : dataStr;
-  showLeaderboard = true;
+  displayLeaderboard = true;
 }
 
 // === INPUT ===
@@ -332,7 +332,7 @@ function render() {
   }
 
   // Leaderboard overlay
-  if (showLeaderboard && leaderboardData) {
+  if (displayLeaderboard && leaderboardData) {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
     ctx.fillRect(0, 0, w, h);
     ctx.fillStyle = '#58a6ff';

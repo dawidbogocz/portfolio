@@ -39,21 +39,21 @@
             {
                 <div class="terminal-line whoami-output">
                     <div class="whoami-table">
-                        <div class="whoami-row">
-                            <span class="whoami-label">name:</span>
-                            <span class="whoami-value">Dawid Bogocz</span>
+                        <div class="whoami-field">
+                            <div class="whoami-label">name:</div>
+                            <div class="whoami-value">&nbsp;&nbsp;Dawid Bogocz</div>
                         </div>
-                        <div class="whoami-row">
-                            <span class="whoami-label">alias:</span>
-                            <span class="whoami-value">dzeyd</span>
+                        <div class="whoami-field">
+                            <div class="whoami-label">alias:</div>
+                            <div class="whoami-value">&nbsp;&nbsp;dzeyd</div>
                         </div>
-                        <div class="whoami-row">
-                            <span class="whoami-label">location:</span>
-                            <span class="whoami-value">Wieluń, Poland</span>
+                        <div class="whoami-field">
+                            <div class="whoami-label">location:</div>
+                            <div class="whoami-value">&nbsp;&nbsp;Wieluń, Poland</div>
                         </div>
-                        <div class="whoami-row">
-                            <span class="whoami-label">role:</span>
-                            <span class="whoami-value">MES Administrator // Game &amp; App Dev // AI Dabbler</span>
+                        <div class="whoami-field">
+                            <div class="whoami-label">role:</div>
+                            <div class="whoami-value">&nbsp;&nbsp;MES Administrator // Game &amp; App Dev // AI Dabbler</div>
                         </div>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
 
     .terminal-window {
         width: 100%;
-        max-width: 820px;
+        max-width: 1100px;
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(0, 255, 65, 0.12);
@@ -176,23 +176,23 @@
     .whoami-table {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 6px;
     }
 
-    .whoami-row {
+    .whoami-field {
         display: flex;
-        gap: 12px;
-        align-items: baseline;
+        flex-direction: column;
+        gap: 1px;
     }
 
     .whoami-label {
         color: #56b6c2;
-        min-width: 80px;
-        flex-shrink: 0;
+        font-weight: 600;
     }
 
     .whoami-value {
         color: #e5c07b;
+        padding-left: 8px;
     }
 
     @@keyframes blink {

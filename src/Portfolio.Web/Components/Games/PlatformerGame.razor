@@ -175,6 +175,7 @@
                 catch { }
             }, null, 0, 500);
 
+            await _jsModule!.InvokeVoidAsync("start", ElementId);
             await _jsModule!.InvokeVoidAsync("loadLevel", ElementId, levelData);
             var seed = await _jsModule.InvokeAsync<int>("getSeed");
             await JS.InvokeVoidAsync("portfolio.updateElementText", $"seed-display-{ElementId}", seed.ToString());
